@@ -1,5 +1,5 @@
 const BASIC_SALES_TAX = .10;
-const IMPORT_TAX = .05 + BASIC_SALES_TAX; // no exemptions for import tax
+const IMPORT_TAX = .05;
 
 const BOOKS = [
 	'book',
@@ -36,12 +36,24 @@ const config = {
 	taxAmounts: {
 		basic: BASIC_SALES_TAX,
 		imports: IMPORT_TAX,
-		exemptions: 0
+		noTax: 0
 	},
-	exemptions: [...BOOKS, ...FOOD, ...MEDICAL],
-	imports: IMPORTS,
-	basic: [],
-	priorities: ['imports', 'exemptions', 'basic'] //lower index is higher priority
+	categories: {
+		exemptions: [...BOOKS, ...FOOD, ...MEDICAL],
+		imports: IMPORTS
+	},
+	rules: [
+		{
+			type: 'imports',
+			hit: 'imports',
+			miss: 'noTax'
+		},
+		{
+			type: 'exemptions',
+			hit: 'noTax',
+			miss: 'basic' 
+		}
+	]
 }
 
 module.exports = config;

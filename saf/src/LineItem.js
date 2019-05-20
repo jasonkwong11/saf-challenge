@@ -1,28 +1,26 @@
+const { roundUp } = require('./utils.js');
+
 class LineItem {
 
-	findIntersection(priorityList, itemTags) {
-		return priorityList.filter(
-			//if the priority list contains an exact match of an item tag
+	findIntersection(rulesList, itemTags) {
+		return rulesList.filter(
 			element => itemTags.includes(element) ||
-			// if the item tag contains a singular substring from the priority list
 			itemTags.filter(tag => tag.includes(element)).length
 		)
 	}
 
 	calculateSalesTax(unitPrice, quantity, itemTags, config) {
-		const { priorities, taxAmounts } = config;
-		for (let p of priorities) {
-			let priorityList = config[p]
-			let intersection = this.findIntersection(priorityList, itemTags)
-			if (intersection.length){
-				return ((quantity * unitPrice) * taxAmounts[p])
+		const { rules, categories, taxAmounts } = config;
+		let taxRate = 0;
+		rules.forEach(rule => {
+			const found = this.findIntersection(categories[rule.type], itemTags)
+			if (found.length) {
+				taxRate += taxAmounts[rule.hit]
+			} else {
+				taxRate += taxAmounts[rule.miss]
 			}
-
-			if (p === 'basic'){
-				return ((quantity * unitPrice) * taxAmounts['basic'])
-			}
-		}
-
+		})
+		return roundUp(quantity * unitPrice * taxRate);
 	}
 
 	constructor({ quantity, itemTags, unitPrice}, config) {
